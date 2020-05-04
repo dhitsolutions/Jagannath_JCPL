@@ -1,0 +1,1334 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Windows.Forms;
+using System.Data.SqlClient;
+
+namespace RamdevSales
+{
+    public partial class Master : Form
+    {
+        private UserLogin userLogin;
+        public static string companyId = string.Empty;
+        DataTable dt10 = new DataTable();
+        ServerConnection con = new ServerConnection();
+        Connection cl = new Connection();
+        public Master()
+        {
+            
+            InitializeComponent();
+            lblcompanyid.Text = "Company Id: " + companyId;
+            
+            CompanyList ci = new CompanyList(this);
+            
+            ci.MdiParent = this;
+            ci.StartPosition = FormStartPosition.WindowsDefaultLocation;
+            ci.Show();
+            
+        }
+
+        public Master(UserLogin userLogin)
+        {
+            // TODO: Complete member initialization
+            InitializeComponent();
+            this.userLogin = userLogin;
+           // enablemenu(true);
+        }
+        public void enablemenu(bool a)
+        {
+            try
+            {
+                
+                // InitializeComponent();
+                //  this.userLogin = userLogin;
+                masterToolStripMenuItem.Visible = a;
+                SalesToolStripMenuItem.Visible = a;
+                PrintToolStripMenuItem.Visible = a;
+                UtilityToolStripMenuItem.Visible = a;
+                ViewToolStripMenuItem.Visible = a;
+                ExitToolStripMenuItem.Visible = a;
+            }
+            catch
+            {
+            }
+        }
+
+        public void disablecompany(bool a)
+        {
+            try
+            {
+                companyToolStripMenuItem.Visible = a;
+            }
+            catch
+            {
+            }
+        }
+
+        public void compId(string p)
+        {
+           // lblCompanyId.Text = "Company Id: "+ p;
+            if (p != string.Empty)
+            {
+                companyId = p;
+                lblcompanyid.Text = "Company Id: " + companyId;
+            }
+        }
+
+        public void getView()
+        {
+            try
+            {
+                DataTable sersaledt = new DataTable();
+                sersaledt = con.getdataset("select CompanyType from Company where companyId=" + companyId + "");
+                if (sersaledt != null && sersaledt.Rows.Count > 0)
+                {
+                    if (sersaledt.Rows[0][0].ToString() == "Store")
+                    {
+                        saleOrderToolStripMenuItem.Visible = false;
+                        purchaseOrderReportToolStripMenuItem.Visible = false;
+                    }
+                    else if (sersaledt.Rows[0][0].ToString() == "Factory")
+                    {
+                        saleOrderToolStripMenuItem.Visible = true;
+                        purchaseOrderReportToolStripMenuItem.Visible = true;
+                        //synchronizationToolStripMenuItem.Visible = false;
+                    }
+                }
+                dt10 = con.getdataset("select a, u, d, v, p, mId, uId, cId from UserRights where uId='" + UserLogin.id + "' and cId= " + Master.companyId + " and isActive=1");
+                if (dt10 != null)
+                {
+                    for (int i = 0; i < dt10.Rows.Count; i++)
+                    {
+                        if ((dt10.Rows[i]["mId"].ToString()) == "1")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i][3]) == false)
+                            {
+                                saleToolStripMenuItem.Visible = false;
+                            }
+                        }
+                        if ((dt10.Rows[i]["mId"].ToString()) == "3")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i][3]) == false)
+                            {
+                                quickReceiptToolStripMenuItem.Visible = false;
+                            }
+                        }
+                        if ((dt10.Rows[i]["mId"].ToString()) == "4")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i][3]) == false)
+                            {
+                                purchaseToolStripMenuItem.Visible = false;
+                            }
+                        }
+                        if ((dt10.Rows[i]["mId"].ToString()) == "5")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i]["v"].ToString()) == false)
+                            {
+                                purchaseOrderToolStripMenuItem.Visible = false;
+                            }
+                        }
+                        if ((dt10.Rows[i]["mId"].ToString()) == "6")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i][3]) == false)
+                            {
+                                paymentToolStripMenuItem.Visible = false;
+                            }
+                        }
+                        if ((dt10.Rows[i]["mId"].ToString()) == "9")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i][3]) == false)
+                            {
+                                userToolStripMenuItem.Visible = false;
+                            }
+                        }
+                        if ((dt10.Rows[i]["mId"].ToString()) == "10")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i][3]) == false)
+                            {
+                                pOSToolStripMenuItem.Visible = false;
+                            }
+                        }
+                        if ((dt10.Rows[i]["mId"].ToString()) == "11")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i][3]) == false)
+                            {
+                                itemToolStripMenuItem1.Visible = false;
+                            }
+                        }
+                        if ((dt10.Rows[i]["mId"].ToString()) == "12")
+                        {
+                            if (Convert.ToBoolean(dt10.Rows[i][3]) == false)
+                            {
+                                clientsToolStripMenuItem.Visible = false;
+                            }
+                        }
+                    }
+                }
+            }
+            catch { }
+            finally
+            {
+                //  userLogin.Close();
+
+            }
+
+        }
+
+        
+        private void Master_Load(object sender, EventArgs e)
+        {
+            this.WindowState = FormWindowState.Maximized; 
+        }
+
+        private void InvoiceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Form1 frm = new Form1();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void FloatToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClientRegistration frm = new ClientRegistration();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void clientWiseProductMarginToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClientWiseProductMargin frm = new ClientWiseProductMargin();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void CashPickupToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ProductMaster frm = new ProductMaster();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void PettyCashPickupToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CompanyMaster frm = new CompanyMaster();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void HeldTransctionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PaymentDetail frm = new PaymentDetail();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+            Application.Exit();
+        }
+
+        private void paymentStatusToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //PaymentStatus frm = new PaymentStatus();
+            //frm.MdiParent = this;
+            //frm.StartPosition = FormStartPosition.CenterScreen;
+            //frm.Show();
+        }
+
+        private void QuantityInputToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Inward frm = new Inward();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void XReportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rptstkin frm = new rptstkin();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void dateWiseBillInvoiceToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DateWiseReport frm = new DateWiseReport();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void inwardDetailsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StockIn frm = new StockIn();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void ReprintLastReceiptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            StockReport frm = new StockReport();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void ZReportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClientWiseSelling frm = new ClientWiseSelling();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void itemToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Itemmaster frm = new Itemmaster();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void saleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DateWiseReport frm = new DateWiseReport();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.Manual;
+            frm.Show();
+           
+        }
+
+        private void billToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ItemWiseStock frm = new ItemWiseStock();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void itemToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            Itemmaster frm = new Itemmaster();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+
+            //string title = "TabPage " + (tabControl1.TabCount + 1).ToString();
+            //TabPage myTabPage = new TabPage(title);
+            //tabControl1.TabPages.Add(myTabPage);
+        }
+
+        private void groupToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Group frm = new Group();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void clientsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ClientRegistration frm = new ClientRegistration();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void ledgerToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Ledger frm = new Ledger();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void quickReceiptToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            QReceipt frm = new QReceipt();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void paymentToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            QPayment frm = new QPayment();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void toolStripStatusLabel1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripStatusLabel2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pOSBillListToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            POSBillList frm = new POSBillList();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void pOSItemListToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            POSItemList frm = new POSItemList();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void pOSToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            POS frm = new POS();
+            
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+        
+        private void purchaseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DateWisePurchaseReport frm = new DateWisePurchaseReport("p");
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            
+                frm.Show();
+            
+         }
+
+        private void purchaseOrderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //DateWisePurchaseOrderReport frm = new DateWisePurchaseOrderReport();
+            //frm.MdiParent = this;
+            //frm.StartPosition = FormStartPosition.CenterScreen;
+            //frm.Show();
+        }
+
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CompanyInfo frm = new CompanyInfo();
+            //frm.Passed(1);
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CompanyList frm = new CompanyList(this);
+            UserLogin ul = new UserLogin(this);
+            frm.Passed(1);
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void mapCompanyPathToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CompanyList ci = new CompanyList(this);
+
+            ci.MdiParent = this;
+            ci.StartPosition = FormStartPosition.WindowsDefaultLocation;
+            ci.Show();
+        }
+
+        private void sQLServerSettingsToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            AddConString frm = new AddConString();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void exitToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void userToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            UserList frm = new UserList();
+           
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void userProfileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            UserRights frm = new UserRights();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void companyInfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CompanyInfo frm = new CompanyInfo();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void closeCompanyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            enablemenu(false);
+            disablecompany(true);
+            lblcompanyid.Text = "";
+            companyId = string.Empty;
+            CompanyList ci = new CompanyList(this);
+
+            ci.MdiParent = this;
+            ci.StartPosition = FormStartPosition.CenterScreen;
+            ci.Show();
+        }
+
+        private void purchaseReturnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //PurchaseReturnList frm = new PurchaseReturnList();
+            //frm.MdiParent = this;
+            //frm.StartPosition = FormStartPosition.CenterScreen;
+            //frm.Show();
+        }
+
+        private void saleReturnToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DatewiseSaleReturn frm = new DatewiseSaleReturn();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        public static string currency = string.Empty;
+        internal void setheader(DataTable companydt, string p)
+        {
+            this.Text = "Business Plus #170407 [" + companydt.Rows[0]["CompanyName"].ToString() + "] [FY = " + Convert.ToDateTime(companydt.Rows[0]["StartDate"]).Date.ToString("dd/MMM/yyyy") + " to " + Convert.ToDateTime(companydt.Rows[0]["EndDate"]).Date.ToString("dd/MMM/yyyy") + "] User=" + p;
+            //this.Text = "Business Plus #170407 [" + companydt.Rows[0]["CompanyName"].ToString() + "] [FY = " + Convert.ToDateTime(companydt.Rows[0]["StartDate"]).Date + " to " + Convert.ToDateTime(companydt.Rows[0]["EndDate"]).Date + "] User=" + p;
+           // lblcurrency.Text = "[" + companydt.Rows[0][11].ToString() + "]";
+            lblcurrency.Text = "[INR]";
+            currency = lblcurrency.Text;
+        }
+
+        private void pOSBillListToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void openingStockEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpStock frm = new OpStock();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void masterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void closeCompanyToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            var form2 = new Master();
+            form2.Closed += (s, args) => this.Close();
+            form2.Show();
+            companyId = "";
+        }
+
+        private void optionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Options frm = new Options();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void purchaseTypeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            PurchaseTypeMaster frm = new PurchaseTypeMaster();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void sqlServerSettingsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            AddConString frm = new AddConString();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void companyInfoToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            CompanyInfo frm = new CompanyInfo();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void purchaseOrderToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            DateWisePurchaseOrderReport frm = new DateWisePurchaseOrderReport();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void purchaseReturnToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            PurchaseReturnList frm = new PurchaseReturnList();
+            frm.MdiParent = this;
+            frm.StartPosition = FormStartPosition.CenterScreen;
+            frm.Show();
+        }
+
+        private void saleOrderToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //DataTable dtcomptype = new DataTable();
+            //dtcomptype = cl.getdataset("Select Companytype from Company where CompanyId='" + Master.companyId + "'");
+            //if (dtcomptype.Rows[0][0].ToString() == "Store")
+            //{
+                DateWiseSaleOrderReport frm = new DateWiseSaleOrderReport();
+                frm.MdiParent = this;
+                frm.StartPosition = FormStartPosition.CenterScreen;
+                frm.Show();
+            //}
+            //else
+            //{
+                
+            //}
+        }
+      
+        private void synchronizationToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                DataTable company = new DataTable();
+                company = cl.getdataset("select CompanyType from company Where CompanyID='"+Master.companyId+"'");
+                if (company.Rows[0]["CompanyType"].ToString() == "Factory")
+                {
+                    timer1.Start();
+                    //PurchaseOrderMaster
+                    #region
+
+                    DataTable serverdata = new DataTable();
+                    DataTable localdata = new DataTable();
+                    localdata = cl.getdataset("select * from PurchaseOrderMaster");
+                    serverdata = con.getdataset("select * from PurchaseOrderMaster");
+
+                    if (localdata.Rows.Count == serverdata.Rows.Count)
+                    {
+
+                        for (int i = 0; i < serverdata.Rows.Count; i++)
+                        {
+                            DataTable isavail = cl.getdataset("select * from purchaseordermaster where idtosync='" + serverdata.Rows[i]["idtosync"].ToString() + "' and orderno='" + serverdata.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + serverdata.Rows[i]["VchNo"].ToString() + "','" + serverdata.Rows[i]["OrderNo"].ToString() + "','" + serverdata.Rows[i]["OrderDate"].ToString() + "','" + serverdata.Rows[i]["OrderStatus"].ToString() + "','" + serverdata.Rows[i]["Terms"].ToString() + "','" + serverdata.Rows[i]["ClientID"].ToString() + "','" + serverdata.Rows[i]["PurchaseType"].ToString() + "'," + serverdata.Rows[i]["Count"].ToString() + "," + serverdata.Rows[i]["TotalQty"].ToString() + "," + serverdata.Rows[i]["TotalBasic"].ToString() + "," + serverdata.Rows[i]["TotalTax"].ToString() + "," + serverdata.Rows[i]["TotalAddTax"].ToString() + "," + serverdata.Rows[i]["TotalDiscount"].ToString() + "," + serverdata.Rows[i]["TotalNet"].ToString() + ",'" + serverdata.Rows[i]["isactive"].ToString() + "','" + serverdata.Rows[i]["DispatchDetails"].ToString() + "','" + serverdata.Rows[i]["Remarks"].ToString() + "'," + serverdata.Rows[i]["CompanyId"].ToString() + ",'" + serverdata.Rows[i]["isGenerated"].ToString() + "','" + serverdata.Rows[i]["GeneDate"].ToString() + "','" + serverdata.Rows[i]["isInvoice"].ToString() + "','" + serverdata.Rows[i]["InvoiceDate"].ToString() + "','" + serverdata.Rows[i]["isscyn"].ToString() + "','" + serverdata.Rows[i]["IdToSync"].ToString() + "','" + serverdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                cl.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+
+                                if (Convert.ToDateTime(serverdata.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+
+                                    con.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + serverdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + serverdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + serverdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + serverdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + serverdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + serverdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + serverdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + serverdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + serverdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + serverdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + serverdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + serverdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + serverdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + serverdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+
+                            }
+
+                        }
+                    }
+
+                    else if (localdata.Rows.Count > serverdata.Rows.Count)
+                    {
+                        for (int i = 0; i < localdata.Rows.Count; i++)
+                        {
+                            DataTable isavail = con.getdataset("select * from purchaseordermaster where idtosync='" + localdata.Rows[i]["idtosync"].ToString() + "' and orderno='" + localdata.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + localdata.Rows[i]["VchNo"].ToString() + "','" + localdata.Rows[i]["OrderNo"].ToString() + "','" + localdata.Rows[i]["OrderDate"].ToString() + "','" + localdata.Rows[i]["OrderStatus"].ToString() + "','" + localdata.Rows[i]["Terms"].ToString() + "','" + localdata.Rows[i]["ClientID"].ToString() + "','" + localdata.Rows[i]["PurchaseType"].ToString() + "'," + localdata.Rows[i]["Count"].ToString() + "," + localdata.Rows[i]["TotalQty"].ToString() + "," + localdata.Rows[i]["TotalBasic"].ToString() + "," + localdata.Rows[i]["TotalTax"].ToString() + "," + localdata.Rows[i]["TotalAddTax"].ToString() + "," + localdata.Rows[i]["TotalDiscount"].ToString() + "," + localdata.Rows[i]["TotalNet"].ToString() + ",'" + localdata.Rows[i]["isactive"].ToString() + "','" + localdata.Rows[i]["DispatchDetails"].ToString() + "','" + localdata.Rows[i]["Remarks"].ToString() + "'," + localdata.Rows[i]["CompanyId"].ToString() + ",'" + localdata.Rows[i]["isGenerated"].ToString() + "','" + localdata.Rows[i]["GeneDate"].ToString() + "','" + localdata.Rows[i]["isInvoice"].ToString() + "','" + localdata.Rows[i]["InvoiceDate"].ToString() + "','" + localdata.Rows[i]["isscyn"].ToString() + "','" + localdata.Rows[i]["IdToSync"].ToString() + "','" + localdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                con.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+                                if (Convert.ToDateTime(localdata.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + localdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + localdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + localdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + localdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + localdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + localdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + localdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + localdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + localdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + localdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + localdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + localdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + localdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + localdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    con.execute(qry1);
+                                }
+
+
+
+                            }
+
+                        }
+                    }
+                    else if (localdata.Rows.Count < serverdata.Rows.Count)
+                    {
+                        for (int i = 0; i < serverdata.Rows.Count; i++)
+                        {
+                            DataTable isavail = cl.getdataset("select * from purchaseordermaster where idtosync='" + serverdata.Rows[i]["idtosync"].ToString() + "' and orderno='" + serverdata.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + serverdata.Rows[i]["VchNo"].ToString() + "','" + serverdata.Rows[i]["OrderNo"].ToString() + "','" + serverdata.Rows[i]["OrderDate"].ToString() + "','" + serverdata.Rows[i]["OrderStatus"].ToString() + "','" + serverdata.Rows[i]["Terms"].ToString() + "','" + serverdata.Rows[i]["ClientID"].ToString() + "','" + serverdata.Rows[i]["PurchaseType"].ToString() + "'," + serverdata.Rows[i]["Count"].ToString() + "," + serverdata.Rows[i]["TotalQty"].ToString() + "," + serverdata.Rows[i]["TotalBasic"].ToString() + "," + serverdata.Rows[i]["TotalTax"].ToString() + "," + serverdata.Rows[i]["TotalAddTax"].ToString() + "," + serverdata.Rows[i]["TotalDiscount"].ToString() + "," + serverdata.Rows[i]["TotalNet"].ToString() + ",'" + serverdata.Rows[i]["isactive"].ToString() + "','" + serverdata.Rows[i]["DispatchDetails"].ToString() + "','" + serverdata.Rows[i]["Remarks"].ToString() + "'," + serverdata.Rows[i]["CompanyId"].ToString() + ",'" + serverdata.Rows[i]["isGenerated"].ToString() + "','" + serverdata.Rows[i]["GeneDate"].ToString() + "','" + serverdata.Rows[i]["isInvoice"].ToString() + "','" + serverdata.Rows[i]["InvoiceDate"].ToString() + "','" + serverdata.Rows[i]["isscyn"].ToString() + "','" + serverdata.Rows[i]["IdToSync"].ToString() + "','" + serverdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                cl.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+                                if (Convert.ToDateTime(serverdata.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+
+                                    con.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + serverdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + serverdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + serverdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + serverdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + serverdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + serverdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + serverdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + serverdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + serverdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + serverdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + serverdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + serverdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + serverdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + serverdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+
+
+                            }
+
+                        }
+                    }
+                    #endregion
+                    //PurchaseOrderProductMaster
+                    #region
+
+                    DataTable serverdataproduct = new DataTable();
+                    DataTable localdataproduct1 = new DataTable();
+                    localdataproduct1 = cl.getdataset("select * from PurchaseOrderProductMaster");
+                    serverdataproduct = con.getdataset("select * from PurchaseOrderProductMaster");
+                    DataTable localdataproduct = new DataTable();
+
+                    for (int k = 0; k < localdataproduct1.Rows.Count; k++)
+                    {
+                        DataTable isavail = cl.getdataset("select * from PurchaseOrderProductMaster where idtosync='" + localdataproduct1.Rows[k]["idtosync"].ToString() + "' and orderno='" + localdataproduct1.Rows[k]["orderno"].ToString() + "'");
+                        //for (int m = 0; m < isavail.Rows.Count; m++)
+                        //{
+                        //    for (int n = 0; n < localdataproduct1.Rows.Count; n++)
+                        //    {
+                        //        if (isavail.Rows[m]["idtosync"].ToString() == localdataproduct1.Rows[n]["idtosync"].ToString())
+                        //        {
+                        //            DataRow dr = localdataproduct1.Rows[n];
+                        //            dr.Delete();
+                        //            localdataproduct1.AcceptChanges();
+                        //            n = -1;
+                        //        }
+                        //    }
+                        //}
+                        if (isavail.Rows.Count > 1)
+                        {
+                            for (int j = 0; j < isavail.Rows.Count; j++)
+                            {
+                                if (isavail.Rows.Count > 1)
+                                {
+                                    if (isavail.Rows[j]["isactive"].ToString() == "False")
+                                    {
+                                        DataRow dr = isavail.Rows[j];
+
+                                        dr.Delete();
+                                        isavail.AcceptChanges();
+                                    }
+                                }
+                            }
+                        }
+
+                        localdataproduct.Merge(isavail);
+                    }
+
+
+                    if (localdataproduct.Rows.Count == serverdataproduct.Rows.Count)
+                    {
+
+                        for (int i = 0; i < serverdataproduct.Rows.Count; i++)
+                        {
+                            DataTable isavail = cl.getdataset("select * from PurchaseOrderProductMaster where idtosync='" + serverdataproduct.Rows[i]["idtosync"].ToString() + "' and orderno='" + serverdataproduct.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+                            if (isavail.Rows.Count > 1)
+                            {
+                                for (int j = 0; j < isavail.Rows.Count; j++)
+                                {
+                                    if (isavail.Rows.Count > 1)
+                                    {
+                                        if (isavail.Rows[j]["isactive"].ToString() == "False")
+                                        {
+                                            DataRow dr = isavail.Rows[j];
+                                            dr.Delete();
+                                            isavail.AcceptChanges();
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderProductMaster]([VchNo],[OrderNo],[OrderRunDate],[OrderStatus],[ProductName],[Qty],[Free],[Rate],[Per],[BasicAmount],[DiscountPer],[Discount],[Vat],[AddVat],[Total],[isactive],[Description],[isscyn],[IdToSync],[ProductId],[CompanyId],[syncDatetime])VALUES('" + serverdataproduct.Rows[i]["VchNo"].ToString() + "','" + serverdataproduct.Rows[i]["OrderNo"].ToString() + "','" + serverdataproduct.Rows[i]["OrderRunDate"].ToString() + "','" + serverdataproduct.Rows[i]["OrderStatus"].ToString() + "','" + serverdataproduct.Rows[i]["ProductName"].ToString() + "','" + serverdataproduct.Rows[i]["Qty"].ToString() + "','0','0','0','0','0','0','0','0','0','" + serverdataproduct.Rows[i]["isactive"].ToString() + "','" + serverdataproduct.Rows[i]["Description"].ToString() + "','" + serverdataproduct.Rows[i]["isscyn"].ToString() + "','" + serverdataproduct.Rows[i]["IdToSync"].ToString() + "','" + serverdataproduct.Rows[i]["ProductId"].ToString() + "','" + serverdataproduct.Rows[i]["CompanyId"].ToString() + "','" + serverdataproduct.Rows[i]["syncDatetime"].ToString() + "')";
+                                //   string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + serverdata.Rows[i]["VchNo"].ToString() + "','" + serverdata.Rows[i]["OrderNo"].ToString() + "','" + serverdata.Rows[i]["OrderDate"].ToString() + "','" + serverdata.Rows[i]["OrderStatus"].ToString() + "','" + serverdata.Rows[i]["Terms"].ToString() + "','" + serverdata.Rows[i]["ClientID"].ToString() + "','" + serverdata.Rows[i]["PurchaseType"].ToString() + "'," + serverdata.Rows[i]["Count"].ToString() + "," + serverdata.Rows[i]["TotalQty"].ToString() + "," + serverdata.Rows[i]["TotalBasic"].ToString() + "," + serverdata.Rows[i]["TotalTax"].ToString() + "," + serverdata.Rows[i]["TotalAddTax"].ToString() + "," + serverdata.Rows[i]["TotalDiscount"].ToString() + "," + serverdata.Rows[i]["TotalNet"].ToString() + ",'" + serverdata.Rows[i]["isactive"].ToString() + "','" + serverdata.Rows[i]["DispatchDetails"].ToString() + "','" + serverdata.Rows[i]["Remarks"].ToString() + "'," + serverdata.Rows[i]["CompanyId"].ToString() + ",'" + serverdata.Rows[i]["isGenerated"].ToString() + "','" + serverdata.Rows[i]["GeneDate"].ToString() + "','" + serverdata.Rows[i]["isInvoice"].ToString() + "','" + serverdata.Rows[i]["InvoiceDate"].ToString() + "','" + serverdata.Rows[i]["isscyn"].ToString() + "','" + serverdata.Rows[i]["IdToSync"].ToString() + "','" + serverdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                cl.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+                                if (Convert.ToDateTime(serverdataproduct.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + isavail.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + isavail.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + isavail.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + isavail.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + isavail.Rows[i]["isactive"].ToString() + "',[ProductName]='" + isavail.Rows[i]["ProductName"].ToString() + "',[Qty]='" + isavail.Rows[i]["Qty"].ToString() + "',[Description]='" + isavail.Rows[i]["Description"].ToString() + "',syncDatetime='" + isavail.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + isavail.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + isavail.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + isavail.Rows[i]["CompanyId"].ToString() + "'";
+
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + localdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + localdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + localdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + localdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + localdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + localdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + localdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + localdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + localdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + localdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + localdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + localdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + localdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + localdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    con.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + serverdataproduct.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + serverdataproduct.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + serverdataproduct.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + serverdataproduct.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + serverdataproduct.Rows[i]["isactive"].ToString() + "',[ProductName]='" + serverdataproduct.Rows[i]["ProductName"].ToString() + "',[Qty]='" + serverdataproduct.Rows[i]["Qty"].ToString() + "',syncDatetime='" + serverdataproduct.Rows[i]["syncDatetime"].ToString() + "',[Description]='" + serverdataproduct.Rows[i]["Description"].ToString() + "' where [VchNo]='" + serverdataproduct.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + serverdataproduct.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + serverdataproduct.Rows[i]["CompanyId"].ToString() + "'";
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+
+
+                            }
+
+                        }
+                    }
+
+                    else if (localdataproduct.Rows.Count > serverdataproduct.Rows.Count)
+                    {
+                        for (int i = 0; i < localdataproduct.Rows.Count; i++)
+                        {
+                            DataTable isavail = con.getdataset("select * from PurchaseOrderProductMaster where idtosync='" + localdataproduct.Rows[i]["idtosync"].ToString() + "' and orderno='" + localdataproduct.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+                            if (isavail.Rows.Count > 1)
+                            {
+                                for (int j = 0; j < isavail.Rows.Count; j++)
+                                {
+                                    if (isavail.Rows.Count > 1)
+                                    {
+                                        if (isavail.Rows[j]["isactive"].ToString() == "False")
+                                        {
+                                            DataRow dr = isavail.Rows[j];
+                                            dr.Delete();
+                                            isavail.AcceptChanges();
+                                        }
+                                    }
+                                }
+                            }
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderProductMaster]([VchNo],[OrderNo],[OrderRunDate],[OrderStatus],[ProductName],[Qty],[Free],[Rate],[Per],[BasicAmount],[DiscountPer],[Discount],[Vat],[AddVat],[Total],[isactive],[Description],[isscyn],[IdToSync],[ProductId],[CompanyId],[syncDatetime])VALUES('" + localdataproduct.Rows[i]["VchNo"].ToString() + "','" + localdataproduct.Rows[i]["OrderNo"].ToString() + "','" + localdataproduct.Rows[i]["OrderRunDate"].ToString() + "','" + localdataproduct.Rows[i]["OrderStatus"].ToString() + "','" + localdataproduct.Rows[i]["ProductName"].ToString() + "','" + localdataproduct.Rows[i]["Qty"].ToString() + "','0','0','0','0','0','0','0','0','0','" + localdataproduct.Rows[i]["isactive"].ToString() + "','" + localdataproduct.Rows[i]["Description"].ToString() + "','" + localdataproduct.Rows[i]["isscyn"].ToString() + "','" + localdataproduct.Rows[i]["IdToSync"].ToString() + "','" + localdataproduct.Rows[i]["ProductId"].ToString() + "','" + localdataproduct.Rows[i]["CompanyId"].ToString() + "','" + localdataproduct.Rows[i]["syncDatetime"].ToString() + "')";
+                                //   string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + localdata.Rows[i]["VchNo"].ToString() + "','" + localdata.Rows[i]["OrderNo"].ToString() + "','" + localdata.Rows[i]["OrderDate"].ToString() + "','" + localdata.Rows[i]["OrderStatus"].ToString() + "','" + localdata.Rows[i]["Terms"].ToString() + "','" + localdata.Rows[i]["ClientID"].ToString() + "','" + localdata.Rows[i]["PurchaseType"].ToString() + "'," + localdata.Rows[i]["Count"].ToString() + "," + localdata.Rows[i]["TotalQty"].ToString() + "," + localdata.Rows[i]["TotalBasic"].ToString() + "," + localdata.Rows[i]["TotalTax"].ToString() + "," + localdata.Rows[i]["TotalAddTax"].ToString() + "," + localdata.Rows[i]["TotalDiscount"].ToString() + "," + localdata.Rows[i]["TotalNet"].ToString() + ",'" + localdata.Rows[i]["isactive"].ToString() + "','" + localdata.Rows[i]["DispatchDetails"].ToString() + "','" + localdata.Rows[i]["Remarks"].ToString() + "'," + localdata.Rows[i]["CompanyId"].ToString() + ",'" + localdata.Rows[i]["isGenerated"].ToString() + "','" + localdata.Rows[i]["GeneDate"].ToString() + "','" + localdata.Rows[i]["isInvoice"].ToString() + "','" + localdata.Rows[i]["InvoiceDate"].ToString() + "','" + localdata.Rows[i]["isscyn"].ToString() + "','" + localdata.Rows[i]["IdToSync"].ToString() + "','" + localdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                con.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+                                if (Convert.ToDateTime(localdataproduct.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + isavail.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + isavail.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + isavail.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + isavail.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + isavail.Rows[i]["isactive"].ToString() + "',[ProductName]='" + isavail.Rows[i]["ProductName"].ToString() + "',[Qty]='" + isavail.Rows[i]["Qty"].ToString() + "',[Description]='" + isavail.Rows[i]["Description"].ToString() + "',syncDatetime='" + isavail.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + isavail.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + isavail.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + isavail.Rows[i]["CompanyId"].ToString() + "'";
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + serverdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + serverdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + serverdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + serverdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + serverdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + serverdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + serverdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + serverdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + serverdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + serverdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + serverdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + serverdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + serverdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + serverdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + localdataproduct.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + localdataproduct.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + localdataproduct.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + localdataproduct.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + localdataproduct.Rows[i]["isactive"].ToString() + "',[ProductName]='" + localdataproduct.Rows[i]["ProductName"].ToString() + "',[Qty]='" + localdataproduct.Rows[i]["Qty"].ToString() + "',[Description]='" + localdataproduct.Rows[i]["Description"].ToString() + "',syncDatetime='" + localdataproduct.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + localdataproduct.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + localdataproduct.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + localdataproduct.Rows[i]["CompanyId"].ToString() + "'";
+
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+                                    con.execute(qry1);
+                                }
+
+
+                            }
+
+                        }
+                    }
+                    else if (localdataproduct.Rows.Count < serverdataproduct.Rows.Count)
+                    {
+                        for (int i = 0; i < serverdataproduct.Rows.Count; i++)
+                        {
+                            DataTable isavail = cl.getdataset("select * from PurchaseOrderProductMaster where idtosync='" + serverdataproduct.Rows[i]["idtosync"].ToString() + "' and orderno='" + serverdataproduct.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+                            if (isavail.Rows.Count > 1)
+                            {
+                                for (int j = 0; j < isavail.Rows.Count; j++)
+                                {
+                                    if (isavail.Rows.Count > 1)
+                                    {
+                                        if (isavail.Rows[j]["isactive"].ToString() == "False")
+                                        {
+                                            DataRow dr = isavail.Rows[j];
+                                            dr.Delete();
+                                            isavail.AcceptChanges();
+                                        }
+                                    }
+                                }
+                            }
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderProductMaster]([VchNo],[OrderNo],[OrderRunDate],[OrderStatus],[ProductName],[Qty],[Free],[Rate],[Per],[BasicAmount],[DiscountPer],[Discount],[Vat],[AddVat],[Total],[isactive],[Description],[isscyn],[IdToSync],[ProductId],[CompanyId],[syncDatetime])VALUES('" + serverdataproduct.Rows[i]["VchNo"].ToString() + "','" + serverdataproduct.Rows[i]["OrderNo"].ToString() + "','" + serverdataproduct.Rows[i]["OrderRunDate"].ToString() + "','" + serverdataproduct.Rows[i]["OrderStatus"].ToString() + "','" + serverdataproduct.Rows[i]["ProductName"].ToString() + "','" + serverdataproduct.Rows[i]["Qty"].ToString() + "','0','0','0','0','0','0','0','0','0','" + serverdataproduct.Rows[i]["isactive"].ToString() + "','" + serverdataproduct.Rows[i]["Description"].ToString() + "','" + serverdataproduct.Rows[i]["isscyn"].ToString() + "','" + serverdataproduct.Rows[i]["IdToSync"].ToString() + "','" + serverdataproduct.Rows[i]["ProductId"].ToString() + "','" + serverdataproduct.Rows[i]["CompanyId"].ToString() + "','" + serverdataproduct.Rows[i]["syncDatetime"].ToString() + "')";
+                                //  string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + serverdata.Rows[i]["VchNo"].ToString() + "','" + serverdata.Rows[i]["OrderNo"].ToString() + "','" + serverdata.Rows[i]["OrderDate"].ToString() + "','" + serverdata.Rows[i]["OrderStatus"].ToString() + "','" + serverdata.Rows[i]["Terms"].ToString() + "','" + serverdata.Rows[i]["ClientID"].ToString() + "','" + serverdata.Rows[i]["PurchaseType"].ToString() + "'," + serverdata.Rows[i]["Count"].ToString() + "," + serverdata.Rows[i]["TotalQty"].ToString() + "," + serverdata.Rows[i]["TotalBasic"].ToString() + "," + serverdata.Rows[i]["TotalTax"].ToString() + "," + serverdata.Rows[i]["TotalAddTax"].ToString() + "," + serverdata.Rows[i]["TotalDiscount"].ToString() + "," + serverdata.Rows[i]["TotalNet"].ToString() + ",'" + serverdata.Rows[i]["isactive"].ToString() + "','" + serverdata.Rows[i]["DispatchDetails"].ToString() + "','" + serverdata.Rows[i]["Remarks"].ToString() + "'," + serverdata.Rows[i]["CompanyId"].ToString() + ",'" + serverdata.Rows[i]["isGenerated"].ToString() + "','" + serverdata.Rows[i]["GeneDate"].ToString() + "','" + serverdata.Rows[i]["isInvoice"].ToString() + "','" + serverdata.Rows[i]["InvoiceDate"].ToString() + "','" + serverdata.Rows[i]["isscyn"].ToString() + "','" + serverdata.Rows[i]["IdToSync"].ToString() + "','" + serverdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                cl.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+
+                                if (Convert.ToDateTime(serverdataproduct.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + isavail.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + isavail.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + isavail.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + isavail.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + isavail.Rows[i]["isactive"].ToString() + "',[ProductName]='" + isavail.Rows[i]["ProductName"].ToString() + "',[Qty]='" + isavail.Rows[i]["Qty"].ToString() + "',[Description]='" + isavail.Rows[i]["Description"].ToString() + "',syncDatetime='" + isavail.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + isavail.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + isavail.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + isavail.Rows[i]["CompanyId"].ToString() + "'";
+
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + localdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + localdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + localdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + localdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + localdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + localdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + localdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + localdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + localdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + localdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + localdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + localdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + localdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + localdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    con.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + serverdataproduct.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + serverdataproduct.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + serverdataproduct.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + serverdataproduct.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + serverdataproduct.Rows[i]["isactive"].ToString() + "',[ProductName]='" + serverdataproduct.Rows[i]["ProductName"].ToString() + "',[Qty]='" + serverdataproduct.Rows[i]["Qty"].ToString() + "',[Description]='" + serverdataproduct.Rows[i]["Description"].ToString() + "',syncDatetime='" + serverdataproduct.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + serverdataproduct.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + serverdataproduct.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + serverdataproduct.Rows[i]["CompanyId"].ToString() + "'";
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+
+                            }
+
+                        }
+                    }
+                    #endregion
+                    MessageBox.Show("Syncronization has been successfully");
+                }
+                else
+                {
+                    timer1.Start();
+                    //PurchaseOrderMaster
+                    #region
+
+                    DataTable serverdata = new DataTable();
+                    DataTable localdata = new DataTable();
+                    localdata = cl.getdataset("select * from PurchaseOrderMaster");
+                    serverdata = con.getdataset("select * from PurchaseOrderMaster Where CompanyID='" + Master.companyId + "'");
+
+                    if (localdata.Rows.Count == serverdata.Rows.Count)
+                    {
+
+                        for (int i = 0; i < serverdata.Rows.Count; i++)
+                        {
+                            DataTable isavail = cl.getdataset("select * from purchaseordermaster where idtosync='" + serverdata.Rows[i]["idtosync"].ToString() + "' and orderno='" + serverdata.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + serverdata.Rows[i]["VchNo"].ToString() + "','" + serverdata.Rows[i]["OrderNo"].ToString() + "','" + serverdata.Rows[i]["OrderDate"].ToString() + "','" + serverdata.Rows[i]["OrderStatus"].ToString() + "','" + serverdata.Rows[i]["Terms"].ToString() + "','" + serverdata.Rows[i]["ClientID"].ToString() + "','" + serverdata.Rows[i]["PurchaseType"].ToString() + "'," + serverdata.Rows[i]["Count"].ToString() + "," + serverdata.Rows[i]["TotalQty"].ToString() + "," + serverdata.Rows[i]["TotalBasic"].ToString() + "," + serverdata.Rows[i]["TotalTax"].ToString() + "," + serverdata.Rows[i]["TotalAddTax"].ToString() + "," + serverdata.Rows[i]["TotalDiscount"].ToString() + "," + serverdata.Rows[i]["TotalNet"].ToString() + ",'" + serverdata.Rows[i]["isactive"].ToString() + "','" + serverdata.Rows[i]["DispatchDetails"].ToString() + "','" + serverdata.Rows[i]["Remarks"].ToString() + "'," + serverdata.Rows[i]["CompanyId"].ToString() + ",'" + serverdata.Rows[i]["isGenerated"].ToString() + "','" + serverdata.Rows[i]["GeneDate"].ToString() + "','" + serverdata.Rows[i]["isInvoice"].ToString() + "','" + serverdata.Rows[i]["InvoiceDate"].ToString() + "','" + serverdata.Rows[i]["isscyn"].ToString() + "','" + serverdata.Rows[i]["IdToSync"].ToString() + "','" + serverdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                cl.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+
+                                if (Convert.ToDateTime(serverdata.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+
+                                    con.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + serverdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + serverdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + serverdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + serverdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + serverdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + serverdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + serverdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + serverdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + serverdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + serverdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + serverdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + serverdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + serverdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + serverdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+
+                            }
+
+                        }
+                    }
+
+                    else if (localdata.Rows.Count > serverdata.Rows.Count)
+                    {
+                        for (int i = 0; i < localdata.Rows.Count; i++)
+                        {
+                            DataTable isavail = con.getdataset("select * from purchaseordermaster where idtosync='" + localdata.Rows[i]["idtosync"].ToString() + "' and orderno='" + localdata.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + localdata.Rows[i]["VchNo"].ToString() + "','" + localdata.Rows[i]["OrderNo"].ToString() + "','" + localdata.Rows[i]["OrderDate"].ToString() + "','" + localdata.Rows[i]["OrderStatus"].ToString() + "','" + localdata.Rows[i]["Terms"].ToString() + "','" + localdata.Rows[i]["ClientID"].ToString() + "','" + localdata.Rows[i]["PurchaseType"].ToString() + "'," + localdata.Rows[i]["Count"].ToString() + "," + localdata.Rows[i]["TotalQty"].ToString() + "," + localdata.Rows[i]["TotalBasic"].ToString() + "," + localdata.Rows[i]["TotalTax"].ToString() + "," + localdata.Rows[i]["TotalAddTax"].ToString() + "," + localdata.Rows[i]["TotalDiscount"].ToString() + "," + localdata.Rows[i]["TotalNet"].ToString() + ",'" + localdata.Rows[i]["isactive"].ToString() + "','" + localdata.Rows[i]["DispatchDetails"].ToString() + "','" + localdata.Rows[i]["Remarks"].ToString() + "'," + localdata.Rows[i]["CompanyId"].ToString() + ",'" + localdata.Rows[i]["isGenerated"].ToString() + "','" + localdata.Rows[i]["GeneDate"].ToString() + "','" + localdata.Rows[i]["isInvoice"].ToString() + "','" + localdata.Rows[i]["InvoiceDate"].ToString() + "','" + localdata.Rows[i]["isscyn"].ToString() + "','" + localdata.Rows[i]["IdToSync"].ToString() + "','" + localdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                con.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+                                if (Convert.ToDateTime(localdata.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + localdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + localdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + localdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + localdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + localdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + localdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + localdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + localdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + localdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + localdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + localdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + localdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + localdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + localdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    con.execute(qry1);
+                                }
+
+
+
+                            }
+
+                        }
+                    }
+                    else if (localdata.Rows.Count < serverdata.Rows.Count)
+                    {
+                        for (int i = 0; i < serverdata.Rows.Count; i++)
+                        {
+                            DataTable isavail = cl.getdataset("select * from purchaseordermaster where idtosync='" + serverdata.Rows[i]["idtosync"].ToString() + "' and orderno='" + serverdata.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + serverdata.Rows[i]["VchNo"].ToString() + "','" + serverdata.Rows[i]["OrderNo"].ToString() + "','" + serverdata.Rows[i]["OrderDate"].ToString() + "','" + serverdata.Rows[i]["OrderStatus"].ToString() + "','" + serverdata.Rows[i]["Terms"].ToString() + "','" + serverdata.Rows[i]["ClientID"].ToString() + "','" + serverdata.Rows[i]["PurchaseType"].ToString() + "'," + serverdata.Rows[i]["Count"].ToString() + "," + serverdata.Rows[i]["TotalQty"].ToString() + "," + serverdata.Rows[i]["TotalBasic"].ToString() + "," + serverdata.Rows[i]["TotalTax"].ToString() + "," + serverdata.Rows[i]["TotalAddTax"].ToString() + "," + serverdata.Rows[i]["TotalDiscount"].ToString() + "," + serverdata.Rows[i]["TotalNet"].ToString() + ",'" + serverdata.Rows[i]["isactive"].ToString() + "','" + serverdata.Rows[i]["DispatchDetails"].ToString() + "','" + serverdata.Rows[i]["Remarks"].ToString() + "'," + serverdata.Rows[i]["CompanyId"].ToString() + ",'" + serverdata.Rows[i]["isGenerated"].ToString() + "','" + serverdata.Rows[i]["GeneDate"].ToString() + "','" + serverdata.Rows[i]["isInvoice"].ToString() + "','" + serverdata.Rows[i]["InvoiceDate"].ToString() + "','" + serverdata.Rows[i]["isscyn"].ToString() + "','" + serverdata.Rows[i]["IdToSync"].ToString() + "','" + serverdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                cl.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+                                if (Convert.ToDateTime(serverdata.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+
+                                    con.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + serverdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + serverdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + serverdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + serverdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + serverdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + serverdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + serverdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + serverdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + serverdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + serverdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + serverdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + serverdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + serverdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + serverdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+
+
+                            }
+
+                        }
+                    }
+                    #endregion
+                    //PurchaseOrderProductMaster
+                    #region
+
+                    DataTable serverdataproduct = new DataTable();
+                    DataTable localdataproduct1 = new DataTable();
+                    localdataproduct1 = cl.getdataset("select * from PurchaseOrderProductMaster");
+                    serverdataproduct = con.getdataset("select * from PurchaseOrderProductMaster Where CompanyID='" + Master.companyId + "'");
+                    DataTable localdataproduct = new DataTable();
+
+                    for (int k = 0; k < localdataproduct1.Rows.Count; k++)
+                    {
+                        DataTable isavail = cl.getdataset("select * from PurchaseOrderProductMaster where idtosync='" + localdataproduct1.Rows[k]["idtosync"].ToString() + "' and orderno='" + localdataproduct1.Rows[k]["orderno"].ToString() + "'");
+                        //for (int m = 0; m < isavail.Rows.Count; m++)
+                        //{
+                        //    for (int n = 0; n < localdataproduct1.Rows.Count; n++)
+                        //    {
+                        //        if (isavail.Rows[m]["idtosync"].ToString() == localdataproduct1.Rows[n]["idtosync"].ToString())
+                        //        {
+                        //            DataRow dr = localdataproduct1.Rows[n];
+                        //            dr.Delete();
+                        //            localdataproduct1.AcceptChanges();
+                        //            n = -1;
+                        //        }
+                        //    }
+                        //}
+                        if (isavail.Rows.Count > 1)
+                        {
+                            for (int j = 0; j < isavail.Rows.Count; j++)
+                            {
+                                if (isavail.Rows.Count > 1)
+                                {
+                                    if (isavail.Rows[j]["isactive"].ToString() == "False")
+                                    {
+                                        DataRow dr = isavail.Rows[j];
+
+                                        dr.Delete();
+                                        isavail.AcceptChanges();
+                                    }
+                                }
+                            }
+                        }
+
+                        localdataproduct.Merge(isavail);
+                    }
+
+
+                    if (localdataproduct.Rows.Count == serverdataproduct.Rows.Count)
+                    {
+
+                        for (int i = 0; i < serverdataproduct.Rows.Count; i++)
+                        {
+                            DataTable isavail = cl.getdataset("select * from PurchaseOrderProductMaster where idtosync='" + serverdataproduct.Rows[i]["idtosync"].ToString() + "' and orderno='" + serverdataproduct.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+                            if (isavail.Rows.Count > 1)
+                            {
+                                for (int j = 0; j < isavail.Rows.Count; j++)
+                                {
+                                    if (isavail.Rows.Count > 1)
+                                    {
+                                        if (isavail.Rows[j]["isactive"].ToString() == "False")
+                                        {
+                                            DataRow dr = isavail.Rows[j];
+                                            dr.Delete();
+                                            isavail.AcceptChanges();
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderProductMaster]([VchNo],[OrderNo],[OrderRunDate],[OrderStatus],[ProductName],[Qty],[Free],[Rate],[Per],[BasicAmount],[DiscountPer],[Discount],[Vat],[AddVat],[Total],[isactive],[Description],[isscyn],[IdToSync],[ProductId],[CompanyId],[syncDatetime])VALUES('" + serverdataproduct.Rows[i]["VchNo"].ToString() + "','" + serverdataproduct.Rows[i]["OrderNo"].ToString() + "','" + serverdataproduct.Rows[i]["OrderRunDate"].ToString() + "','" + serverdataproduct.Rows[i]["OrderStatus"].ToString() + "','" + serverdataproduct.Rows[i]["ProductName"].ToString() + "','" + serverdataproduct.Rows[i]["Qty"].ToString() + "','0','0','0','0','0','0','0','0','0','" + serverdataproduct.Rows[i]["isactive"].ToString() + "','" + serverdataproduct.Rows[i]["Description"].ToString() + "','" + serverdataproduct.Rows[i]["isscyn"].ToString() + "','" + serverdataproduct.Rows[i]["IdToSync"].ToString() + "','" + serverdataproduct.Rows[i]["ProductId"].ToString() + "','" + serverdataproduct.Rows[i]["CompanyId"].ToString() + "','" + serverdataproduct.Rows[i]["syncDatetime"].ToString() + "')";
+                                //   string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + serverdata.Rows[i]["VchNo"].ToString() + "','" + serverdata.Rows[i]["OrderNo"].ToString() + "','" + serverdata.Rows[i]["OrderDate"].ToString() + "','" + serverdata.Rows[i]["OrderStatus"].ToString() + "','" + serverdata.Rows[i]["Terms"].ToString() + "','" + serverdata.Rows[i]["ClientID"].ToString() + "','" + serverdata.Rows[i]["PurchaseType"].ToString() + "'," + serverdata.Rows[i]["Count"].ToString() + "," + serverdata.Rows[i]["TotalQty"].ToString() + "," + serverdata.Rows[i]["TotalBasic"].ToString() + "," + serverdata.Rows[i]["TotalTax"].ToString() + "," + serverdata.Rows[i]["TotalAddTax"].ToString() + "," + serverdata.Rows[i]["TotalDiscount"].ToString() + "," + serverdata.Rows[i]["TotalNet"].ToString() + ",'" + serverdata.Rows[i]["isactive"].ToString() + "','" + serverdata.Rows[i]["DispatchDetails"].ToString() + "','" + serverdata.Rows[i]["Remarks"].ToString() + "'," + serverdata.Rows[i]["CompanyId"].ToString() + ",'" + serverdata.Rows[i]["isGenerated"].ToString() + "','" + serverdata.Rows[i]["GeneDate"].ToString() + "','" + serverdata.Rows[i]["isInvoice"].ToString() + "','" + serverdata.Rows[i]["InvoiceDate"].ToString() + "','" + serverdata.Rows[i]["isscyn"].ToString() + "','" + serverdata.Rows[i]["IdToSync"].ToString() + "','" + serverdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                cl.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+                                if (Convert.ToDateTime(serverdataproduct.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + isavail.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + isavail.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + isavail.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + isavail.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + isavail.Rows[i]["isactive"].ToString() + "',[ProductName]='" + isavail.Rows[i]["ProductName"].ToString() + "',[Qty]='" + isavail.Rows[i]["Qty"].ToString() + "',[Description]='" + isavail.Rows[i]["Description"].ToString() + "',syncDatetime='" + isavail.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + isavail.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + isavail.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + isavail.Rows[i]["CompanyId"].ToString() + "'";
+
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + localdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + localdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + localdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + localdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + localdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + localdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + localdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + localdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + localdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + localdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + localdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + localdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + localdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + localdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    con.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + serverdataproduct.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + serverdataproduct.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + serverdataproduct.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + serverdataproduct.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + serverdataproduct.Rows[i]["isactive"].ToString() + "',[ProductName]='" + serverdataproduct.Rows[i]["ProductName"].ToString() + "',[Qty]='" + serverdataproduct.Rows[i]["Qty"].ToString() + "',syncDatetime='" + serverdataproduct.Rows[i]["syncDatetime"].ToString() + "',[Description]='" + serverdataproduct.Rows[i]["Description"].ToString() + "' where [VchNo]='" + serverdataproduct.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + serverdataproduct.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + serverdataproduct.Rows[i]["CompanyId"].ToString() + "'";
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+
+
+                            }
+
+                        }
+                    }
+
+                    else if (localdataproduct.Rows.Count > serverdataproduct.Rows.Count)
+                    {
+                        for (int i = 0; i < localdataproduct.Rows.Count; i++)
+                        {
+                            DataTable isavail = con.getdataset("select * from PurchaseOrderProductMaster where idtosync='" + localdataproduct.Rows[i]["idtosync"].ToString() + "' and orderno='" + localdataproduct.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+                            if (isavail.Rows.Count > 1)
+                            {
+                                for (int j = 0; j < isavail.Rows.Count; j++)
+                                {
+                                    if (isavail.Rows.Count > 1)
+                                    {
+                                        if (isavail.Rows[j]["isactive"].ToString() == "False")
+                                        {
+                                            DataRow dr = isavail.Rows[j];
+                                            dr.Delete();
+                                            isavail.AcceptChanges();
+                                        }
+                                    }
+                                }
+                            }
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderProductMaster]([VchNo],[OrderNo],[OrderRunDate],[OrderStatus],[ProductName],[Qty],[Free],[Rate],[Per],[BasicAmount],[DiscountPer],[Discount],[Vat],[AddVat],[Total],[isactive],[Description],[isscyn],[IdToSync],[ProductId],[CompanyId],[syncDatetime])VALUES('" + localdataproduct.Rows[i]["VchNo"].ToString() + "','" + localdataproduct.Rows[i]["OrderNo"].ToString() + "','" + localdataproduct.Rows[i]["OrderRunDate"].ToString() + "','" + localdataproduct.Rows[i]["OrderStatus"].ToString() + "','" + localdataproduct.Rows[i]["ProductName"].ToString() + "','" + localdataproduct.Rows[i]["Qty"].ToString() + "','0','0','0','0','0','0','0','0','0','" + localdataproduct.Rows[i]["isactive"].ToString() + "','" + localdataproduct.Rows[i]["Description"].ToString() + "','" + localdataproduct.Rows[i]["isscyn"].ToString() + "','" + localdataproduct.Rows[i]["IdToSync"].ToString() + "','" + localdataproduct.Rows[i]["ProductId"].ToString() + "','" + localdataproduct.Rows[i]["CompanyId"].ToString() + "','" + localdataproduct.Rows[i]["syncDatetime"].ToString() + "')";
+                                //   string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + localdata.Rows[i]["VchNo"].ToString() + "','" + localdata.Rows[i]["OrderNo"].ToString() + "','" + localdata.Rows[i]["OrderDate"].ToString() + "','" + localdata.Rows[i]["OrderStatus"].ToString() + "','" + localdata.Rows[i]["Terms"].ToString() + "','" + localdata.Rows[i]["ClientID"].ToString() + "','" + localdata.Rows[i]["PurchaseType"].ToString() + "'," + localdata.Rows[i]["Count"].ToString() + "," + localdata.Rows[i]["TotalQty"].ToString() + "," + localdata.Rows[i]["TotalBasic"].ToString() + "," + localdata.Rows[i]["TotalTax"].ToString() + "," + localdata.Rows[i]["TotalAddTax"].ToString() + "," + localdata.Rows[i]["TotalDiscount"].ToString() + "," + localdata.Rows[i]["TotalNet"].ToString() + ",'" + localdata.Rows[i]["isactive"].ToString() + "','" + localdata.Rows[i]["DispatchDetails"].ToString() + "','" + localdata.Rows[i]["Remarks"].ToString() + "'," + localdata.Rows[i]["CompanyId"].ToString() + ",'" + localdata.Rows[i]["isGenerated"].ToString() + "','" + localdata.Rows[i]["GeneDate"].ToString() + "','" + localdata.Rows[i]["isInvoice"].ToString() + "','" + localdata.Rows[i]["InvoiceDate"].ToString() + "','" + localdata.Rows[i]["isscyn"].ToString() + "','" + localdata.Rows[i]["IdToSync"].ToString() + "','" + localdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                con.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+                                if (Convert.ToDateTime(localdataproduct.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + isavail.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + isavail.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + isavail.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + isavail.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + isavail.Rows[i]["isactive"].ToString() + "',[ProductName]='" + isavail.Rows[i]["ProductName"].ToString() + "',[Qty]='" + isavail.Rows[i]["Qty"].ToString() + "',[Description]='" + isavail.Rows[i]["Description"].ToString() + "',syncDatetime='" + isavail.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + isavail.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + isavail.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + isavail.Rows[i]["CompanyId"].ToString() + "'";
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + serverdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + serverdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + serverdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + serverdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + serverdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + serverdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + serverdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + serverdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + serverdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + serverdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + serverdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + serverdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + serverdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + serverdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + localdataproduct.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + localdataproduct.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + localdataproduct.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + localdataproduct.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + localdataproduct.Rows[i]["isactive"].ToString() + "',[ProductName]='" + localdataproduct.Rows[i]["ProductName"].ToString() + "',[Qty]='" + localdataproduct.Rows[i]["Qty"].ToString() + "',[Description]='" + localdataproduct.Rows[i]["Description"].ToString() + "',syncDatetime='" + localdataproduct.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + localdataproduct.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + localdataproduct.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + localdataproduct.Rows[i]["CompanyId"].ToString() + "'";
+
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+                                    con.execute(qry1);
+                                }
+
+
+                            }
+
+                        }
+                    }
+                    else if (localdataproduct.Rows.Count < serverdataproduct.Rows.Count)
+                    {
+                        for (int i = 0; i < serverdataproduct.Rows.Count; i++)
+                        {
+                            DataTable isavail = cl.getdataset("select * from PurchaseOrderProductMaster where idtosync='" + serverdataproduct.Rows[i]["idtosync"].ToString() + "' and orderno='" + serverdataproduct.Rows[i]["orderno"].ToString() + "'");
+                            //  TimeSpan l = Convert.ToDateTime(localdata.Rows[i]["syncDatetime"]);
+                            if (isavail.Rows.Count > 1)
+                            {
+                                for (int j = 0; j < isavail.Rows.Count; j++)
+                                {
+                                    if (isavail.Rows.Count > 1)
+                                    {
+                                        if (isavail.Rows[j]["isactive"].ToString() == "False")
+                                        {
+                                            DataRow dr = isavail.Rows[j];
+                                            dr.Delete();
+                                            isavail.AcceptChanges();
+                                        }
+                                    }
+                                }
+                            }
+                            if (isavail.Rows.Count <= 0)
+                            {
+                                //insert query.
+                                string qry2 = "INSERT INTO [dbo].[PurchaseOrderProductMaster]([VchNo],[OrderNo],[OrderRunDate],[OrderStatus],[ProductName],[Qty],[Free],[Rate],[Per],[BasicAmount],[DiscountPer],[Discount],[Vat],[AddVat],[Total],[isactive],[Description],[isscyn],[IdToSync],[ProductId],[CompanyId],[syncDatetime])VALUES('" + serverdataproduct.Rows[i]["VchNo"].ToString() + "','" + serverdataproduct.Rows[i]["OrderNo"].ToString() + "','" + serverdataproduct.Rows[i]["OrderRunDate"].ToString() + "','" + serverdataproduct.Rows[i]["OrderStatus"].ToString() + "','" + serverdataproduct.Rows[i]["ProductName"].ToString() + "','" + serverdataproduct.Rows[i]["Qty"].ToString() + "','0','0','0','0','0','0','0','0','0','" + serverdataproduct.Rows[i]["isactive"].ToString() + "','" + serverdataproduct.Rows[i]["Description"].ToString() + "','" + serverdataproduct.Rows[i]["isscyn"].ToString() + "','" + serverdataproduct.Rows[i]["IdToSync"].ToString() + "','" + serverdataproduct.Rows[i]["ProductId"].ToString() + "','" + serverdataproduct.Rows[i]["CompanyId"].ToString() + "','" + serverdataproduct.Rows[i]["syncDatetime"].ToString() + "')";
+                                //  string qry2 = "INSERT INTO [dbo].[PurchaseOrderMaster]([VchNo],[OrderNo],[OrderDate],[OrderStatus],[Terms],[ClientID],[PurchaseType],[Count],[TotalQty],[TotalBasic],[TotalTax],[TotalAddTax],[TotalDiscount],[TotalNet],[isactive],[DispatchDetails],[Remarks],[CompanyId],[isGenerated],[GeneDate],[isInvoice],[InvoiceDate],[isscyn],[IdToSync],[syncDatetime])VALUES('" + serverdata.Rows[i]["VchNo"].ToString() + "','" + serverdata.Rows[i]["OrderNo"].ToString() + "','" + serverdata.Rows[i]["OrderDate"].ToString() + "','" + serverdata.Rows[i]["OrderStatus"].ToString() + "','" + serverdata.Rows[i]["Terms"].ToString() + "','" + serverdata.Rows[i]["ClientID"].ToString() + "','" + serverdata.Rows[i]["PurchaseType"].ToString() + "'," + serverdata.Rows[i]["Count"].ToString() + "," + serverdata.Rows[i]["TotalQty"].ToString() + "," + serverdata.Rows[i]["TotalBasic"].ToString() + "," + serverdata.Rows[i]["TotalTax"].ToString() + "," + serverdata.Rows[i]["TotalAddTax"].ToString() + "," + serverdata.Rows[i]["TotalDiscount"].ToString() + "," + serverdata.Rows[i]["TotalNet"].ToString() + ",'" + serverdata.Rows[i]["isactive"].ToString() + "','" + serverdata.Rows[i]["DispatchDetails"].ToString() + "','" + serverdata.Rows[i]["Remarks"].ToString() + "'," + serverdata.Rows[i]["CompanyId"].ToString() + ",'" + serverdata.Rows[i]["isGenerated"].ToString() + "','" + serverdata.Rows[i]["GeneDate"].ToString() + "','" + serverdata.Rows[i]["isInvoice"].ToString() + "','" + serverdata.Rows[i]["InvoiceDate"].ToString() + "','" + serverdata.Rows[i]["isscyn"].ToString() + "','" + serverdata.Rows[i]["IdToSync"].ToString() + "','" + serverdata.Rows[i]["syncDatetime"].ToString() + "')";
+                                cl.execute(qry2);
+
+                            }
+                            else
+                            {
+                                //Update
+
+                                if (Convert.ToDateTime(serverdataproduct.Rows[i]["syncDatetime"].ToString()) < Convert.ToDateTime(isavail.Rows[0]["syncDatetime"].ToString()))
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + isavail.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + isavail.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + isavail.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + isavail.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + isavail.Rows[i]["isactive"].ToString() + "',[ProductName]='" + isavail.Rows[i]["ProductName"].ToString() + "',[Qty]='" + isavail.Rows[i]["Qty"].ToString() + "',[Description]='" + isavail.Rows[i]["Description"].ToString() + "',syncDatetime='" + isavail.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + isavail.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + isavail.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + isavail.Rows[i]["CompanyId"].ToString() + "'";
+
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + localdata.Rows[i]["VchNo"].ToString() + "',[OrderNo] = '" + localdata.Rows[i]["OrderNo"].ToString() + "',[OrderDate] = '" + localdata.Rows[i]["OrderDate"].ToString() + "',[Terms] = '" + localdata.Rows[i]["Terms"].ToString() + "',[ClientID] = '" + localdata.Rows[i]["ClientID"].ToString() + "',[PurchaseType] = '" + localdata.Rows[i]["PurchaseType"].ToString() + "',[Count] = " + localdata.Rows[i]["Count"].ToString() + ",[TotalQty] = " + localdata.Rows[i]["TotalQty"].ToString() + ",[isactive]='" + localdata.Rows[i]["isactive"].ToString() + "',[isscyn]='" + localdata.Rows[i]["isscyn"].ToString() + "',[IdToSync]='" + localdata.Rows[i]["IdToSync"].ToString() + "',syncDatetime='" + localdata.Rows[i]["syncDatetime"].ToString() + "' where VchNo='" + localdata.Rows[i]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + localdata.Rows[i]["IdToSync"].ToString() + "'";
+                                    con.execute(qry1);
+                                }
+                                else
+                                {
+                                    string qry1 = "Update [dbo].[PurchaseOrderProductMaster] SET [Vchno]='" + serverdataproduct.Rows[i]["VchNo"].ToString() + "',[OrderNo]='" + serverdataproduct.Rows[i]["OrderNo"].ToString() + "', [OrderRunDate]='" + serverdataproduct.Rows[i]["OrderRunDate"].ToString() + "',[OrderStatus]='" + serverdataproduct.Rows[i]["OrderStatus"].ToString() + "',[isactive]='" + serverdataproduct.Rows[i]["isactive"].ToString() + "',[ProductName]='" + serverdataproduct.Rows[i]["ProductName"].ToString() + "',[Qty]='" + serverdataproduct.Rows[i]["Qty"].ToString() + "',[Description]='" + serverdataproduct.Rows[i]["Description"].ToString() + "',syncDatetime='" + serverdataproduct.Rows[i]["syncDatetime"].ToString() + "' where [VchNo]='" + serverdataproduct.Rows[i]["VchNo"].ToString() + "' and [IdToSync]='" + serverdataproduct.Rows[i]["IdToSync"].ToString() + "'and [CompanyId]='" + serverdataproduct.Rows[i]["CompanyId"].ToString() + "'";
+                                    //string qry1 = "UPDATE [dbo].[PurchaseOrderMaster]SET [VChNo]='" + isavail.Rows[0]["VchNo"].ToString() + "',[OrderNo] = '" + isavail.Rows[0]["OrderNo"].ToString() + "',[OrderDate] = '" + isavail.Rows[0]["OrderDate"].ToString() + "',[Terms] = '" + isavail.Rows[0]["Terms"].ToString() + "',[ClientID] = '" + isavail.Rows[0]["ClientID"].ToString() + "',[PurchaseType] = '" + isavail.Rows[0]["PurchaseType"].ToString() + "',[Count] = " + isavail.Rows[0]["Count"].ToString() + ",[TotalQty] = " + isavail.Rows[0]["TotalQty"].ToString() + ",[isactive]='" + isavail.Rows[0]["isactive"].ToString() + "',[isscyn]='" + isavail.Rows[0]["isscyn"].ToString() + "',[IdToSync]='" + isavail.Rows[0]["IdToSync"].ToString() + "',syncDatetime='" + isavail.Rows[0]["syncDatetime"].ToString() + "' where VchNo='" + isavail.Rows[0]["VchNo"].ToString() + "' and CompanyId='" + Master.companyId + "' and IdToSync='" + isavail.Rows[0]["IdToSync"].ToString() + "'";
+                                    cl.execute(qry1);
+                                }
+
+                            }
+
+                        }
+                    }
+                    #endregion
+                    MessageBox.Show("Syncronization has been successfully");
+                }
+              
+            }
+            catch { }
+        }
+        
+        private void getsync()
+        {
+            try
+            {
+                DataTable sync = cl.getdataset("select * from sync");
+
+                for (int i = 0; i < sync.Rows.Count; i++)
+                {
+                    string str = con.executereturn(sync.Rows[i]["query"].ToString().Replace("\"", "'"));
+
+                    if (str !=null)
+                    {
+                        cl.execute("delete from sync where id='" + sync.Rows[i]["id"].ToString() + "'");
+                    }
+                    else
+                    {
+                        MessageBox.Show("Syncronization is not been Completed. Please check your Internet Connection or Contact Administrator");
+                        break;
+
+                    }
+                  
+                }
+                MessageBox.Show("Syncronization has been successfully");
+            }
+            catch
+            {
+            }
+
+        }
+
+        private void Timer1_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                toolStripProgressBar1.Increment(3);
+                if (toolStripProgressBar1.Value == toolStripProgressBar1.Maximum)
+                {                    
+                    timer1.Stop();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message.ToString());
+            }
+
+
+        }
+
+        private void purchaseOrderReportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Purchase_Order_Master_Report frm1 = new Purchase_Order_Master_Report();
+            frm1.MdiParent = this;
+            frm1.StartPosition = FormStartPosition.CenterScreen;
+            frm1.Show();
+        }
+    }
+}
